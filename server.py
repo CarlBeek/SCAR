@@ -93,4 +93,4 @@ def main(port: int, db_path: str, create_db: bool) -> None:
     server.serve_forever()
 
 if __name__ == '__main__':
-    main()
+    main(auto_envvar_prefix='SCAR')
