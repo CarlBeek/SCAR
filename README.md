@@ -16,16 +16,25 @@ The primary design goal was to require as few changes to the existing code-bases
 ## Running it
 
 Install requirements:
+
 ```bash
 pip3 install -r requirements.txt
 ```
 
 Create the DB:
+
 ```bash
-python server.py --create-db
+python server.py create-db
 ```
 
-Insert the Whitelisted Ethereum EL Addresses into the DB (eg.):
-```sql
-INSERT INTO whitelist (address, nonce, start_time, end_time) VALUES ('0x000000000000000000000000000000000000dEaD', 4, '2023-03-14T00:00:00', '2023-03-15T00:00:00')
+Import Calendly CSV into whitelist DB:
+
+```bash
+python server.py import-csv --csv-file ./path/to/events-export.csv
+```
+
+Run the server:
+
+```bash
+python server.py run
 ```

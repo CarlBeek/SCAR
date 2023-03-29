@@ -107,8 +107,6 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps({'jsonrpc': '2.0', 'id': 1,'result': nonce}).encode())
 
 
-@click.command()
-@click.option('--db-path', type=str, default='./whitelist.sqlite', help='Path to the SQLite database.')
 def create_db(db_path: str):
     connection = sqlite3.connect(db_path)
     cursor = connection.cursor()
@@ -120,6 +118,14 @@ def create_db(db_path: str):
             end_time TEXT NOT NULL
         )'''
     )
+
+
+@click.command()
+@click.option('--db-path', type=str, default='./whitelist.sqlite', help='Path to the SQLite database.')
+def create_db_command(db_path: str):
+    create_db(db_path)
+    click.echo('Created database.')
+
 
 @click.command()
 @click.option('--csv-file', type=str, default='events-export.csv', help='Path to the Calendly CSV file.')
@@ -133,7 +139,10 @@ def import_csv(csv_file: str, db_path: str) -> None:
 @click.command()
 @click.option('--port', type=int, default=8000, help='Port for the HTTP server to listen on.')
 @click.option('--db-path', type=str, default='./whitelist.sqlite', help='Path to the SQLite database.')
-def main(port: int, db_path: str) -> None:
+@click.option('--auto-create-db', is_flag=True, help='Create the SQLite database if it doesn\'t exist')
+def main(port: int, db_path: str, auto_create_db: bool) -> None:
+    if auto_create_db:
+        create_db(db_path)
     verify_table_exists(db_path)
     server = HTTPServer(('', port), lambda *args, **kwargs: RequestHandler(*args, db_path=db_path, **kwargs))
     click.echo(f'Starting server on port {port}...')
@@ -142,6 +151,6 @@ def main(port: int, db_path: str) -> None:
 if __name__ == '__main__':
     cli = click.Group()
     cli.add_command(main, name='run')
-    cli.add_command(create_db, name='create-db')
+    cli.add_command(create_db_command, name='create-db')
     cli.add_command(import_csv, name='import-csv')
     cli(auto_envvar_prefix='SCAR')
