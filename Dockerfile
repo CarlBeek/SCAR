@@ -1,15 +1,16 @@
 FROM python:3.11.2-alpine
 
-### Setup
-ADD requirements.txt .
-ADD server.py .
+# Setup
+WORKDIR /app
+COPY requirements.txt .
+COPY server.py .
 
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-### Run
-
+# Create the database
 VOLUME /data
 ENV SCAR_DB_PATH="/data/whitelist.sqlite"
-ENV SCAR_CREATE_DB=1
+RUN python server.py create-db --db-path $SCAR_DB_PATH
 
-CMD ["python", "./server.py"]
+# Run the server
+CMD ["python", "./server.py", "run", "--db-path", "/data/whitelist.sqlite"]
